@@ -1,0 +1,134 @@
+
+query 1
+select guestname, guestaddress from guest where guestaddress like "%London";
+guestname    | guestaddress       |
++--------------+--------------------+
+| John Kay     | 56 High St, London |
+| Mike Ritchie | 18 Tain St, London |
+
+query 2
+MariaDB [vacation]> select type, price from room where price < 40.00 and type != 'single' order by price;
++--------+-------+
+| type   | price |
++--------+-------+
+| double | 15.00 |
+| double | 29.00 |
+| double | 30.00 |
+| family | 35.00 |
+| family | 39.00 |
++--------+-------+
+query 3
+MariaDB [vacation]> select * from booking where dateto!='NULL'
+    -> ;
++---------+---------+------------+------------+--------+
+| hotelno | guestno | datefrom   | dateto     | roomno |
++---------+---------+------------+------------+--------+
+| ch02    |   10002 | 2023-04-25 | 2023-05-06 |    801 |
+| dc01    |   10007 | 2023-05-13 | 2023-05-15 |   1001 |
+| fb01    |   10001 | 2023-04-01 | 2023-04-08 |    501 |
+| fb01    |   10002 | 2023-01-04 | 2023-01-29 |    601 |
+| fb01    |   10004 | 2023-04-15 | 2023-05-15 |    601 |
+| fb01    |   10005 | 2023-05-02 | 2023-05-07 |    501 |
+| fb02    |   10003 | 2023-04-05 | 2023-04-04 |   1001 |
+| fb02    |   10005 | 2023-05-12 | 2031-05-04 |   1101 |
++---------+---------+------------+------------+--------+
+query 4
+MariaDB [vacation]> select roomno, avg(price) as averageprice  from room group by roomno;
++--------+--------------+
+| roomno | averageprice |
++--------+--------------+
+|    501 |    19.000000 |
+|    601 |    29.000000 |
+|    701 |    24.500000 |
+|    801 |    15.000000 |
+|    901 |    18.000000 |
+|   1001 |    39.330000 |
+|   1101 |    60.330000 |
++--------+--------------+
+
+query 5
+select sum(price) as total_revenue,  type from room  group by type having type='double';
++---------------+--------+
+| total_revenue | type   |
++---------------+--------+
+|        160.00 | double |
++---------------+--------+
+
+query 6
+MariaDB [vacation]> select distinct(count(guestname)) as number_of_diff_guests from guest join booking on
+booking.guestno = guest.guestno where datefrom like '%08%';
++-----------------------+
+| number_of_diff_guests |
++-----------------------+
+|                     0 |
++-----------------------+
+query 7
+MariaDB [vacation]> select  hotel.hotelname, roomno, price, type from room join hotel on hotel.hotelno = room.hotelno where hotelname = 'Omni Shoreham';
+
++---------------+--------+-------+--------+
+| hotelname     | roomno | price | type   |
++---------------+--------+-------+--------+
+| Omni Shoreham |   1001 | 29.99 | single |
+| Omni Shoreham |   1101 | 59.99 | family |
++---------------+--------+-------+--------+
+query 8
+MariaDB [vacation]> select hotel.hotelname, guest.guestname from booking  join hotel on hotel.hotelno = booking.hotelno join guest on guest.guestno = booking.guestno where hotel.hotelname = "Omni shoreham";
++---------------+-------------+
+| hotelname     | guestname   |
++---------------+-------------+
+| Omni Shoreham | Tina Murphy |
++---------------+-------------+
+
+query 9
+MariaDB [vacation]> select hotel.hotelname, guest.guestname, booking.roomNo as occupied_rooms from booking  join hotel on hotel.hotelno = booking.hotelno join guest on guest.guestno = booking.guestno  where hotel.hotelname = "Omni shoreham";
++---------------+-------------+----------------+
+| hotelname     | guestname   | occupied_rooms |
++---------------+-------------+----------------+
+| Omni Shoreham | Tina Murphy |           1101 |
++---------------+-------------+----------------+
+query 10
+MariaDB [vacation]> select hotel.hotelname,  sum(price)  as total_income from room join hotel on hotel.hotelno = room.hotelno  where hotel.hotelname = "Omni shoreham" and roomno = '1101'  group by hotel.hotelname;
++---------------+--------------+
+| hotelname     | total_income |
++---------------+--------------+
+| Omni Shoreham |        59.99 |
++---------------+--------------+
+1 row in set (0.001 sec)
+
+
+query 11
+MariaDB [vacation]> select hotel.hotelname, guest.guestname, room.roomNo  from booking  join hotel on
+hotel.hotelno = booking.hotelno join guest on guest.guestno = booking.guestno   join room on room.roomno = booking.roomno  where hotel.hotelname = "Omni shoreham" and room.roomNo != '1101';
+Empty set (0.001 sec)
+query 12
+MariaDB [vacation]> select hotel.hotelname, sum(room.price) as lost_income, room.roomNo  from booking
+ join hotel on hotel.hotelno = booking.hotelno    join room on room.roomno = booking.roomno  where hotel.hotelname = "Omni shoreham" and room.roomNo != '1101';
++-----------+-------------+--------+
+| hotelname | lost_income | roomNo |
++-----------+-------------+--------+
+| NULL      |        NULL |   NULL |
++-----------+-------------+--------+
+1 row in set (0.001 sec)
+
+query 13
+ select hotelname, count(room.roomNo) as number_of_rooms from hotel join room on room.hotelno = hotel.hotelno where city='London'  group by hotelname ;
++-----------------+-----------------+
+| hotelname       | number_of_rooms |
++-----------------+-----------------+
+| Omni Shoreham   |               2 |
+| Phoenix Park    |               2 |
+| The Tower Hotel |               3 |
++-----------------+-----------------+
+query 14
+MariaDB [vacation]> select type, count(distinct(booking.roomno)) as room_count, hotel.hotelname from room join hotel on room.hotelno = hotel.hotelno join booking on booking.roomno = room.roomno  where city
+'London'  group by hotelname order by  room_count desc;
++--------+------------+-----------------+
+| type   | room_count | hotelname       |
++--------+------------+-----------------+
+| single |          3 | The Tower Hotel |
+| single |          2 | Omni Shoreham   |
+| single |          2 | Phoenix Park    |
++--------+------------+-----------------+
+query 15
+update room set price = (1,05 * price);
+
