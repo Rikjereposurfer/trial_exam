@@ -1,0 +1,9 @@
+UNF: DB(staffNO, dentistName, patientNo, patientName, appointment date, appointment time, surgeryNO)
+
+1NF: DB(*staffNO*, dentistName, *patientNo*, patientName, appointment date, appointment time,*surgeryNO*)
+
+2NF: staff(*staffNo*, dentistName)=> dentistname only depends on 1 part of primary key, partial dependancy
+     patient(*patientNO*, *surgeryNO*, patientName)=> patientname only depends on 2/3 parts out of primary key, partial dependancy
+     date(*staffNo*, *patientNo*, *surgeryNO*, appointment date, appointment time)7
+2NF=3NF fields that are not primary key dont depend on one another
+
