@@ -1,1 +1,4 @@
 git init trialexam
+git add exercise2.txt
+git commit -m created file exercise2.txt
+git commit -m created file exercise1.txt
